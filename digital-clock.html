@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Digital Clock</title>
+    <link rel="stylesheet" href="digital-clock.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="clock">
+            <nav class="nav-bar">
+                <div class="logo">Clock App</div>
+                <button class="settings-btn" onclick="toggleSettings()">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </nav>
+
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchMode('digital')">
+                    <i class="fas fa-clock"></i>
+                </button>
+               
+                <button class="tab-btn" onclick="switchMode('alarm')">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <button class="tab-btn" onclick="switchMode('timer')">
+                    <i class="fas fa-hourglass"></i>
+                </button>
+                <button class="tab-btn" onclick="switchMode('stopwatch')">
+                    <i class="fas fa-stopwatch"></i>
+                </button>
+            </div>
+
+            <div class="content-area">
+                <div id="digital-mode" class="clock-mode active">
+                    <div class="time" id="time">00:00:00</div>
+                    <div class="ampm" id="ampm">AM</div>
+                    <div class="date" id="date">Sunday, January 1, 2023</div>
+                    <div id="weather-widget" class="weather-info"></div>
+                </div>
+
+                <div id="analog-mode" class="clock-mode">
+                    <canvas id="analog-clock"></canvas>
+                </div>
+
+                <div id="alarm-mode" class="clock-mode">
+                    <div class="alarm-container">
+                        <input type="time" id="alarm-time">
+                        <button onclick="setAlarm()">Set Alarm</button>
+                        <div id="active-alarms"></div>
+                    </div>
+                </div>
+
+                <div id="timer-mode" class="clock-mode">
+                    <div class="timer-container">
+                        <input type="number" id="timer-minutes" placeholder="Minutes">
+                        <button onclick="startTimer()">Start</button>
+                        <button onclick="pauseTimer()">Pause</button>
+                        <button onclick="resetTimer()">Reset</button>
+                        <div id="timer-display">00:00</div>
+                    </div>
+                </div>
+
+                <div id="stopwatch-mode" class="clock-mode">
+                    <div class="stopwatch-container">
+                        <div id="stopwatch-display">00:00:00</div>
+                        <button onclick="startStopwatch()">Start</button>
+                        <button onclick="pauseStopwatch()">Pause</button>
+                        <button onclick="resetStopwatch()">Reset</button>
+                        <div id="lap-times"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Modal -->
+            <div id="settings-modal" class="settings-modal">
+                <div class="settings-content">
+                    <h3>Settings</h3>
+                    <div class="settings-group">
+                        <label>Time Format</label>
+                        <button onclick="toggleTimeFormat()" class="format-toggle">
+                            12/24 Hour
+                        </button>
+                    </div>
+                    <div class="settings-group">
+                        <label>Theme</label>
+                        <button onclick="toggleTheme()" class="theme-toggle">
+                            Dark/Light
+                        </button>
+                    </div>
+                    <div class="settings-group">
+                        <label>Timezone</label>
+                        <select id="timezone" onchange="updateTimezone()">
+                            <option value="local">Local Time</option>
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York">New York</option>
+                            <option value="Europe/London">London</option>
+                            <option value="Asia/Tokyo">Tokyo</option>
+                        </select>
+                    </div>
+                    <div class="settings-group">
+                        <label>Accent Color</label>
+                        <input type="color" id="color-picker" onchange="updateColors()">
+                    </div>
+                    <div class="settings-group">
+                        <label>Font Style</label>
+                        <select id="font-selector" onchange="updateFont()">
+                            <option value="Roboto">Roboto</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Digital">Digital</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="digital-clock.js"></script>
+    <audio id="alarm-sound" src="alarm.mp3"></audio>
+</body>
+</html>
