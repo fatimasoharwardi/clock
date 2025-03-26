@@ -1,5 +1,4 @@
 let is24Hour = false;
-let currentTimezone = 'local';
 
 function updateTime() {
     const now = new Date();
@@ -41,11 +40,6 @@ function toggleTheme() {
     );
 }
 
-function updateTimezone() {
-    currentTimezone = document.getElementById('timezone').value;
-    updateTime();
-}
-
 // Mode switching
 function switchMode(mode) {
     const tabs = document.querySelectorAll('.tab-btn');
@@ -76,18 +70,35 @@ function switchMode(mode) {
 
 // Alarm functionality
 let alarms = [];
+
 function setAlarm() {
-    const time = document.getElementById('alarm-time').value;
-    alarms.push(time);
-    updateAlarmsList();
+    const timeInput = document.getElementById('alarm-time');
+    if (!timeInput.value) {
+        alert('Please select a time for the alarm');
+        return;
+    }
+    
+    const [hours, minutes] = timeInput.value.split(':');
+    const alarmTime = `${hours}:${minutes}`;
+    
+    if (!alarms.includes(alarmTime)) {
+        alarms.push(alarmTime);
+        updateAlarmsList();
+        timeInput.value = '';
+    } else {
+        alert('This alarm already exists!');
+    }
 }
 
 function checkAlarms() {
     const now = new Date();
-    const currentTime = `${now.getHours()}:${now.getMinutes()}`;
+    const currentHours = now.getHours().toString().padStart(2, '0');
+    const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+    const currentTime = `${currentHours}:${currentMinutes}`;
+
     alarms.forEach(alarm => {
         if (alarm === currentTime) {
-            playAlarm();
+            startAlarmSound();
         }
     });
 }
@@ -96,8 +107,10 @@ function updateAlarmsList() {
     const alarmsElement = document.getElementById('active-alarms');
     alarmsElement.innerHTML = alarms.map((time, index) => `
         <div class="alarm-item">
-            ${time}
-            <button onclick="deleteAlarm(${index})">Delete</button>
+            <span>${time}</span>
+            <button class="delete-alarm" onclick="deleteAlarm(${index})">
+                <i class="fas fa-trash"></i>
+            </button>
         </div>
     `).join('');
 }
@@ -109,7 +122,113 @@ function deleteAlarm(index) {
 
 function playAlarm() {
     const audio = document.getElementById('alarm-sound');
-    audio.play();
+    const volume = document.getElementById('alarm-volume').value;
+    audio.volume = volume;
+    audio.loop = true;
+    audio.currentTime = 0;
+    audio.play().catch(error => {
+        console.error('Error playing alarm:', error);
+        alert('Could not play alarm sound. Please check your browser settings.');
+    });
+    
+    // Stop alarm after 30 seconds
+    setTimeout(() => {
+        audio.pause();
+        audio.loop = false;
+        audio.currentTime = 0;
+    }, 30000);
+}
+
+function testAlarm() {
+    const audio = document.getElementById('alarm-sound');
+    const volume = document.getElementById('alarm-volume').value;
+    audio.volume = volume;
+    audio.currentTime = 0;
+    audio.play().then(() => {
+        setTimeout(() => {
+            audio.pause();
+            audio.currentTime = 0;
+        }, 2000); // Play for 2 seconds as test
+    }).catch(error => {
+        console.error('Error testing alarm:', error);
+        alert('Could not play alarm sound. Please check your browser settings.');
+    });
+}
+
+function testAlarmSound() {
+    const audio = document.getElementById('alarm-sound');
+    const volume = document.getElementById('alarm-volume').value;
+    audio.volume = volume;
+    audio.currentTime = 0;
+    audio.loop = false;
+    
+    // Play for 2 seconds only
+    audio.play().then(() => {
+        setTimeout(() => {
+            audio.pause();
+            audio.currentTime = 0;
+        }, 2000);
+    }).catch(error => {
+        console.error('Error playing test sound:', error);
+        alert('Could not play alarm sound. Please check your browser settings.');
+    });
+}
+
+function startAlarmSound() {
+    const audio = document.getElementById('alarm-sound');
+    const volume = document.getElementById('alarm-volume').value;
+    const popup = document.getElementById('alarm-popup');
+    
+    audio.volume = volume;
+    audio.currentTime = 0;
+    audio.loop = true;
+    
+    audio.play().then(() => {
+        popup.style.display = 'flex';
+    }).catch(error => {
+        console.error('Error playing alarm:', error);
+        alert('Could not play alarm sound. Please check your browser settings.');
+    });
+}
+
+function stopAlarm() {
+    const audio = document.getElementById('alarm-sound');
+    const popup = document.getElementById('alarm-popup');
+    
+    // Stop the audio
+    audio.pause();
+    audio.currentTime = 0;
+    audio.loop = false;
+    
+    // Hide the popup
+    popup.style.display = 'none';
+    
+    // Find and remove the current alarm time from alarms array
+    const now = new Date();
+    const currentHours = now.getHours().toString().padStart(2, '0');
+    const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+    const currentTime = `${currentHours}:${currentMinutes}`;
+    
+    const index = alarms.indexOf(currentTime);
+    if (index > -1) {
+        alarms.splice(index, 1);
+        updateAlarmsList();
+    }
+}
+
+function snoozeAlarm() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 5);
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const snoozeTime = `${hours}:${minutes}`;
+    
+    if (!alarms.includes(snoozeTime)) {
+        alarms.push(snoozeTime);
+        updateAlarmsList();
+    }
+    
+    stopAlarm();
 }
 
 // Timer functionality
@@ -217,12 +336,6 @@ async function updateWeather() {
     } catch (error) {
         console.error('Weather update failed:', error);
     }
-}
-
-// Customization
-function updateColors() {
-    const color = document.getElementById('color-picker').value;
-    document.documentElement.style.setProperty('--accent-color', color);
 }
 
 function updateFont() {
